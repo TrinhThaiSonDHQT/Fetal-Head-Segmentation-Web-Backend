@@ -9,10 +9,10 @@ from pathlib import Path
 import sys
 import os
 
-# Add parent directory to path to import model architecture
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+# Add backend directory to path for model imports
+sys.path.insert(0, os.path.dirname(__file__))
 
-from .model.mobinet_aspp_residual_se import MobileNetV2ASPPResidualSEUNet
+from model.mobinet_aspp_residual_se import MobileNetV2ASPPResidualSEUNet
 
 
 class ModelLoader:

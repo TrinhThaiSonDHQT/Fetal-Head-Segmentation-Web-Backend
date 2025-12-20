@@ -11,8 +11,7 @@ from PIL import Image
 import time
 from typing import Dict
 import albumentations as A
-from quality_checker import QualityChecker
-from ultrasound_detector import UltrasoundDetector
+from utils import QualityChecker, UltrasoundDetector
 
 
 class InferenceEngine:
