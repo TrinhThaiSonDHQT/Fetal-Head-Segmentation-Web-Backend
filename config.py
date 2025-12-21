@@ -28,8 +28,8 @@ class Config:
     CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:3000').split(',')
     
     # Model
-    # Use original model on Railway (8GB RAM), quantized on Render (512MB RAM)
-    MODEL_PATH = Path(os.getenv('MODEL_PATH', 'best_model_mobinet_aspp_residual_se_v2.pth'))
+    # Use quantized model to reduce Docker image size (97 MB vs 272 MB)
+    MODEL_PATH = Path(os.getenv('MODEL_PATH', 'best_model_mobinet_aspp_residual_se_v2_quantized.pth'))
     
     # Logging
     LOG_DIR = Path('logs')
