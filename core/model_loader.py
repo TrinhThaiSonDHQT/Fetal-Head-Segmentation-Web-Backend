@@ -59,11 +59,15 @@ class ModelLoader:
     def _load_model(self):
         """
         Load model architecture and weights.
+        Supports both original and quantized models.
         
         Returns:
             nn.Module: Loaded model in evaluation mode
         """
         try:
+            # Detect if quantized model
+            is_quantized = 'quantized' in str(self.model_path).lower()
+            
             # Load the checkpoint (weights_only=False for compatibility)
             checkpoint = torch.load(
                 self.model_path, 
@@ -97,6 +101,9 @@ class ModelLoader:
             # Move to device and set to eval mode
             model = model.to(self.device)
             model.eval()
+            
+            if is_quantized:
+                print("✓ Quantized model detected (INT8 - reduced memory)")
             
             return model
             

@@ -28,7 +28,7 @@ class Config:
     CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:3000').split(',')
     
     # Model
-    MODEL_PATH = Path(os.getenv('MODEL_PATH', 'best_model_mobinet_aspp_residual_se_v2.pth'))
+    MODEL_PATH = Path(os.getenv('MODEL_PATH', 'best_model_mobinet_aspp_residual_se_v2_quantized.pth'))
     
     # Logging
     LOG_DIR = Path('logs')
