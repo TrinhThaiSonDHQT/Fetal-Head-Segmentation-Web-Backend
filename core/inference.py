@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 from PIL import Image
 import time
+import os
 from typing import Dict
 import albumentations as A
 from utils import QualityChecker, UltrasoundDetector
@@ -36,8 +37,14 @@ class InferenceEngine:
         self.quality_checker = QualityChecker()
         self.us_detector = UltrasoundDetector()
         
+        # Check if TTA is disabled via environment variable
+        self.tta_enabled = os.getenv('DISABLE_TTA', '0') != '1'
+        
         # Define TTA transforms (aligned with training augmentations)
         self._setup_tta_transforms()
+        
+        if not self.tta_enabled:
+            print("⚠️  TTA disabled via DISABLE_TTA environment variable")
     
     def _setup_tta_transforms(self):
         """
@@ -362,7 +369,7 @@ class InferenceEngine:
             'tta_confidence': float(tta_confidence)
         }
     
-    def process_image(self, image: np.ndarray, threshold: float = 0.5, use_tta: bool = True) -> Dict:
+    def process_image(self, image: np.ndarray, threshold: float = 0.5, use_tta: bool = None) -> Dict:
         """
         Complete inference pipeline with validation.
         
@@ -376,7 +383,7 @@ class InferenceEngine:
         Args:
             image: Input image (RGB/grayscale numpy array)
             threshold: Segmentation threshold (default: 0.5)
-            use_tta: Whether to use Test-Time Augmentation (default: True)
+            use_tta: Whether to use Test-Time Augmentation (default: None, uses env var)
         
         Returns:
             Dictionary with results and validation info:
@@ -392,6 +399,10 @@ class InferenceEngine:
                 'tta_confidence': (if use_tta=True) TTA-based confidence
             }
         """
+        # Use environment-based TTA setting if not explicitly specified
+        if use_tta is None:
+            use_tta = self.tta_enabled
+        
         # Step 1: Check if image is ultrasound
         is_ultrasound, us_confidence = self.us_detector.is_ultrasound(image)
         
