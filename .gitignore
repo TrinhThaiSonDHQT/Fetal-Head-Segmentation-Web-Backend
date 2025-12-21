@@ -29,9 +29,8 @@ ENV/
 *.log
 logs/
 
-# Model checkpoints (keep only production model)
+# Model checkpoints (keep only temporary files, allow production model via LFS)
 *.pth.tmp
-*.pth
 checkpoints/
 
 # OS
