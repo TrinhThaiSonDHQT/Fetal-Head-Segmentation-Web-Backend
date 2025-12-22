@@ -27,8 +27,16 @@ Reference:
 """
 import torch
 import torch.nn as nn
-import torchvision.models as models
-from torchvision.models import MobileNet_V2_Weights
+
+# Optimize imports - only import what we need to speed up loading
+try:
+    # Faster import - only load MobileNetV2 instead of all models
+    from torchvision.models.mobilenetv2 import mobilenet_v2, MobileNet_V2_Weights
+except ImportError:
+    # Fallback for older torchvision versions
+    import torchvision.models as models
+    from torchvision.models import MobileNet_V2_Weights
+    mobilenet_v2 = models.mobilenet_v2
 
 # Use proper relative imports from parent package
 from .residual_block import ResidualBlockSE
@@ -86,7 +94,7 @@ class MobileNetV2ASPPResidualSEUNet(nn.Module):
         
         # ==================== ENCODER (MobileNetV2) ====================
         # Load pre-trained MobileNetV2
-        mobilenet = models.mobilenet_v2(weights=weights)
+        mobilenet = mobilenet_v2(weights=weights)
         
         # MobileNetV2 expects 3-channel RGB input, but we have 1-channel grayscale
         # Solution: Replace first conv layer to accept 1-channel input

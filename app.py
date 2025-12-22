@@ -1,105 +1,56 @@
 """
-Flask REST API for Fetal Head Segmentation
-
-Application factory and initialization.
+Flask REST API for Fetal Head Segmentation - Local Development
 """
 from flask import Flask
 from flask_cors import CORS
-import logging
-from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
-from config import get_config
 from services import SegmentationService
 from middleware import register_error_handlers
 from routes import health_bp, segmentation_bp, benchmark_bp
 
+# Initialize Flask app
+app = Flask(__name__)
 
-def setup_logging(app):
-    """Configure application logging."""
-    if not app.debug:
-        # Create logs directory if it doesn't exist
-        app.config['LOG_DIR'].mkdir(exist_ok=True)
-        
-        # File handler with rotation
-        file_handler = RotatingFileHandler(
-            app.config['LOG_DIR'] / 'app.log',
-            maxBytes=app.config['LOG_MAX_BYTES'],
-            backupCount=app.config['LOG_BACKUP_COUNT']
-        )
-        file_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-        ))
-        file_handler.setLevel(logging.INFO)
-        app.logger.addHandler(file_handler)
-        
-        app.logger.setLevel(logging.INFO)
-        app.logger.info('Fetal Head Segmentation API startup')
+# Simple configuration for local development
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB
+app.config['SECRET_KEY'] = 'dev-secret-key'
 
+# CORS - Allow requests from frontend dev server
+CORS(app, resources={r'/api/*': {'origins': 'http://localhost:3000'}})
 
-def create_app(config_name=None):
-    """
-    Application factory pattern for production deployment.
-    
-    Args:
-        config_name: Configuration name ('development', 'production', 'testing')
-    
-    Returns:
-        Flask application instance
-    """
-    # Initialize Flask app
-    app = Flask(__name__)
-    
-    # Load configuration
-    config_class = get_config(config_name)
-    app.config.from_object(config_class)
-    
-    # CORS Configuration
-    CORS(app, resources={r'/api/*': {'origins': app.config['CORS_ORIGINS']}})
-    
-    # Setup logging
-    setup_logging(app)
-    
-    # Initialize segmentation service
-    model_path = config_class.get_model_path()
-    segmentation_service = SegmentationService(model_path)
-    segmentation_service.initialize_model()
-    
-    # Store service in app config for access in routes
-    app.config['SEGMENTATION_SERVICE'] = segmentation_service
-    
-    # Register blueprints
-    app.register_blueprint(health_bp, url_prefix='/api')
-    app.register_blueprint(segmentation_bp, url_prefix='/api')
-    app.register_blueprint(benchmark_bp, url_prefix='/api')
-    
-    # Register error handlers
-    register_error_handlers(app)
-    
-    return app
+# Initialize segmentation service
+model_path = Path('best_model_mobinet_aspp_residual_se_v2.pth')
+segmentation_service = SegmentationService(model_path)
+segmentation_service.initialize_model()
 
+# Store service in app config for access in routes
+app.config['SEGMENTATION_SERVICE'] = segmentation_service
 
-# Create app instance for production servers (Gunicorn/Waitress)
-app = create_app()
+# Register blueprints
+app.register_blueprint(health_bp, url_prefix='/api')
+app.register_blueprint(segmentation_bp, url_prefix='/api')
+app.register_blueprint(benchmark_bp, url_prefix='/api')
+
+# Register error handlers
+register_error_handlers(app)
 
 
 if __name__ == '__main__':
-    # Development server only
     print("\n" + "="*60)
-    print("Starting Fetal Head Segmentation API Server (DEVELOPMENT)")
+    print("Fetal Head Segmentation API - Local Development Server")
     print("="*60)
     print(f"Server: http://localhost:5000")
     print(f"Health: http://localhost:5000/api/health")
     print(f"Upload: POST http://localhost:5000/api/upload")
     print(f"Benchmark: GET http://localhost:5000/api/benchmark")
-    print("="*60)
-    print("⚠ WARNING: This is the development server. Use Gunicorn/Waitress for production.")
     print("="*60 + "\n")
     
     try:
         app.run(debug=True, host='127.0.0.1', port=5000)
+    except KeyboardInterrupt:
+        print("\n✓ Server stopped by user")
     except Exception as e:
-        print(f"Server crashed with error: {e}")
+        print(f"\n✗ Server crashed: {e}")
         import traceback
         traceback.print_exc()
-    finally:
-        print("Server shutting down...")
