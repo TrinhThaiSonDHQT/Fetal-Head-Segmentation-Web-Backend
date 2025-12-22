@@ -1,7 +1,5 @@
 """
-Simple configuration constants for local development.
-
-Note: This file is kept for potential future use but is not actively used in the simplified local setup.
+Configuration constants.
 """
 from pathlib import Path
 

@@ -1,5 +1,5 @@
 """
-Flask REST API for Fetal Head Segmentation - Local Development
+Flask REST API for Fetal Head Segmentation
 """
 from flask import Flask
 from flask_cors import CORS
@@ -12,11 +12,11 @@ from routes import health_bp, segmentation_bp, benchmark_bp
 # Initialize Flask app
 app = Flask(__name__)
 
-# Simple configuration for local development
+# Configuration
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB
 app.config['SECRET_KEY'] = 'dev-secret-key'
 
-# CORS - Allow requests from frontend dev server
+# CORS - Allow requests from frontend
 CORS(app, resources={r'/api/*': {'origins': 'http://localhost:3000'}})
 
 # Initialize segmentation service
@@ -38,7 +38,7 @@ register_error_handlers(app)
 
 if __name__ == '__main__':
     print("\n" + "="*60)
-    print("Fetal Head Segmentation API - Local Development Server")
+    print("Fetal Head Segmentation API")
     print("="*60)
     print(f"Server: http://localhost:5000")
     print(f"Health: http://localhost:5000/api/health")
