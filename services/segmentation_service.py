@@ -150,7 +150,7 @@ class SegmentationService:
         """
         # Get path to dataset
         project_root = Path(__file__).parent.parent.parent
-        dataset_path = project_root / 'shared' / 'dataset_v5' / 'training_set' / 'images'
+        dataset_path = project_root / 'backend' / 'data'
         
         if not dataset_path.exists():
             raise FileNotFoundError(f'Dataset path not found: {dataset_path}')
